@@ -1,0 +1,176 @@
+1.)Broken acess control:
+
+Broken Access Control vulnerability occurs when an attacker is able to access resources or functionality that they should not be able to access, 
+such as viewing or modifying sensitive data or performing unauthorized actions. 
+Here's an example of a broken access control vulnerability and its fix in the form of code.
+
+Example:
+
+Suppose we have a web application that allows users to access their personal profile by entering their user ID. 
+The user profile page displays the user's personal information, such as their name, email address, and phone number.
+The URL for accessing a user's profile page is something like this:
+
+
+https://example.com/profile?user_id=12345
+
+
+The application uses a simple server-side check to ensure that the user is authorized to view the requested profile:
+
+python code:
+def view_profile(user_id):
+    if current_user.id == user_id:
+        user = get_user(user_id)
+        return render_template('profile.html', user=user)
+    else:
+        abort(403)
+
+
+In this code, `current_user` represents the currently logged-in user, and `get_user()` retrieves the user object from the database based on the provided `user_id`. 
+If the current user's ID matches the requested `user_id`, the user's profile is displayed. Otherwise, a 403 Forbidden error is returned.
+
+However, an attacker can easily bypass this authorization check by modifying the `user_id` parameter in the URL. For example, 
+an attacker can access another user's profile by simply changing the URL to:
+
+
+https://example.com/profile?user_id=67890
+
+(This is a classic example of broken access control vulnerability.)
+
+Fix:
+
+One way to fix this vulnerability is to include additional checks to ensure that the user is authorized to view the requested profile. 
+For example, we can add a check to ensure that the user is logged in and has the necessary permissions to view the requested profile.
+
+python code:
+@login_required
+def view_profile(user_id):
+    user = get_user(user_id)
+    if current_user.can_view_profile(user):
+        return render_template('profile.html', user=user)
+    else:
+        abort(403)
+
+
+In this code, we have added the `@login_required` decorator to ensure that the user is logged in before accessing the profile page.
+We have also added a new method `can_view_profile()` to the `User` model to check if the current user has permission to view the requested profile.
+
+python code:
+class User(db.Model):
+    # ...
+    def can_view_profile(self, user):
+        return self.id == user.id or self.is_admin
+
+
+In this code, we have added the `can_view_profile()` method to the `User` model. This method checks if the current user is the same 
+as the requested user or if the current user is an admin. If either of these conditions is true, the method returns `True`, 
+indicating that the current user is authorized to view the requested profile. Otherwise, the method returns `False`.
+
+By adding these additional checks, we can prevent unauthorized access to user profiles and fix the broken access control vulnerability.
+
+
+
+
+2)Cryptogaphic failures.
+
+Cryptographic failures can happen in many different ways, such as using weak encryption algorithms, 
+poorly designed key management systems, or incorrect implementation of cryptographic functions. Here's an example of a common cryptographic
+vulnerability and a possible fix:
+
+Vulnerability: Using weak encryption algorithm
+
+# Vulnerable code
+import hashlib
+message = "secret message"
+hash_object = hashlib.md5(message.encode())
+print(hash_object.hexdigest())
+
+
+In this code, the MD5 algorithm is used to hash the `message`. However, MD5 is a weak cryptographic algorithm that
+can be easily brute-forced or exploited with collision attacks.
+
+Fix:Using a stronger algorithm
+# Fixed code
+import hashlib
+message = "secret message"
+hash_object = hashlib.sha256(message.encode())
+print(hash_object.hexdigest())
+
+In this fixed code, the SHA-256 algorithm is used instead of MD5, which is considered a stronger cryptographic algorithm. 
+
+Note that fixing a cryptographic vulnerability can be more involved than simply changing the algorithm used. 
+It often requires careful consideration of key management, secure random number generation, and implementation details.
+It's important to consult with security experts and follow best practices when implementing cryptography in your code.
+
+
+
+
+
+
+3)Injection(SQL injection vulnerability and a fix):
+
+SQL injection vulnerability and a fix in the form of code:
+
+## SQL Injection Vulnerability
+
+python code:
+import mysql.connector
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="password",
+    database="mydatabase"
+)
+
+cursor = db.cursor()
+
+username = input("Enter your username: ")
+password = input("Enter your password: ")
+
+sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+
+cursor.execute(sql)
+
+result = cursor.fetchall()
+
+if len(result) > 0:
+    print("Login successful!")
+else:
+    print("Login failed.")
+
+
+
+In this code, user input for `username` and `password` is directly concatenated into an SQL query string,
+which can allow an attacker to inject SQL code into the query and potentially access or modify sensitive data.
+
+## Fix for SQL Injection Vulnerability
+
+python Code:
+
+import mysql.connector
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="password",
+    database="mydatabase"
+)
+
+cursor = db.cursor()
+
+username = input("Enter your username: ")
+password = input("Enter your password: ")
+
+sql = "SELECT * FROM users WHERE username = %s AND password = %s"
+
+cursor.execute(sql, (username, password))
+
+result = cursor.fetchall()
+
+if len(result) > 0:
+    print("Login successful!")
+else:
+    print("Login failed.")
+
+
+In this fixed code, instead of concatenating user input into an SQL query string, placeholders `%s` are used, and the user
+input is passed separately as a tuple to the `execute()` method. This way, any injected SQL code is treated as plain data and is not
+executed as part of the query. This helps to prevent SQL injection attacks.
