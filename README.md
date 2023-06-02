@@ -36,10 +36,4 @@ openai.api_key = "YOUR API"
 streamlit run app.py
 ```
 
-## Usage
-
-```python
-
-
-```
 
