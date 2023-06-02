@@ -29,7 +29,7 @@ Copy the API key
 ```
 4.) Create a .env file in the root of the repository directory, and add the following line, replacing <your-api-key> with your actual API key:
 ```bash
-OPENAI_API_KEY=<your-api-key>
+openai.api_key = "YOUR API"
 ```
 5)Run the application using streamlit:
 ```bash
